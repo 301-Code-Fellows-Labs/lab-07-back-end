@@ -47,8 +47,7 @@ function Location(query, res) {
 function getWeather(request, response) {
   const url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${request.query.data.latitude},${request.query.data.longitude}`
 
-  return superagent.get(url)
-  
+  return superagent.get(url) 
     .then(res => {
       const weatherEntries = res.body.daily.data.map(day => {
         return new Weather(day);
@@ -62,15 +61,21 @@ function getWeather(request, response) {
 }
 
 function getEvents(request, response) {
-  const url = `https://www.eventbriteapi.com/v3/events/search?${request.query.data.latitude},${request.query.data.longitude}&token=${process.env.EVENTBRITE_API_KEY}`
+  const url = `https://www.eventbriteapi.com/v3/events/search?location.latitude=${request.query.data.latitude}&location.longitude=${request.query.data.longitude}&token=${process.env.EVENTBRITE_API_KEY}`
   return superagent.get(url)
-    .then(res => {
-      const eventEntries = new Event(request.query.events, JSON.parse(res.text));
-      response.send(eventEntries);
-    })
+
+    .then(
+      res => {  
+        const eventEntries = res.body.events.map(ev => {
+          return new Event(ev);     
+        })
+        response.send(eventEntries);
+        console.log (eventEntries);
+      })
     .catch(error => {
       response.send(error);
     });
+   
 }
 
 function Event(res) {
